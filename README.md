@@ -1,91 +1,115 @@
-# CCL / CC-Source
+# ⚡ CCL: Anthropic Claude Code 架构解析与核心源码深度归档
+### Claude Code Deep Architecture Analysis, Runtime Dissection & Source Snapshot
 
-> `@anthropic-ai/claude-code` v2.1.88 提取源码归档与结构分析仓库。
+<p align="center">
+  <img src="https://img.shields.io/badge/Anthropic-Claude%20Code-D97706.svg?style=flat-square&logo=anthropic" alt="Claude Code" />
+  <img src="https://img.shields.io/badge/Package-%40anthropic--ai%2Fclaude--code-blue.svg?style=flat-square&logo=npm" alt="NPM Package" />
+  <img src="https://img.shields.io/badge/Target%20Version-v2.1.88-brightgreen.svg?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/Runtime-Node.js%20%3E%3D18-339933.svg?style=flat-square&logo=nodedotjs" alt="Node.js" />
+  <img src="https://img.shields.io/badge/UI%20Framework-React%20%2B%20Ink-61DAFB.svg?style=flat-square&logo=react" alt="React Ink" />
+  <img src="https://img.shields.io/badge/Architecture-Agentic%20Loop%20%2B%20MCP-purple.svg?style=flat-square" alt="Architecture" />
+</p>
 
-这个仓库保存了一份本地提取得到的 Claude Code 源码快照，以及对应的结构化分析文档，方便做代码阅读、架构研究、功能拆解与二次分析。
+---
 
-## 项目元信息
+## 📌 项目定位 (Executive Summary)
 
-- **Package**: `@anthropic-ai/claude-code`
-- **Version**: `2.1.88`
-- **Entry**: `cli.js`
-- **Runtime**: `Node.js >= 18.0.0`
-- **Module Type**: `ESM`
-- **Author**: `Anthropic <support@anthropic.com>`
-- **Homepage**: <https://github.com/anthropics/claude-code>
-- **Extracted At**: `2026-03-31T08:42:29.288Z`
-- **Total Sources**: `4756`
+**CCL (Claude Code Library / Dissection)** 是一份针对 Anthropic 官方旗舰级终端 AI 编程智能体 **`@anthropic-ai/claude-code` (v2.1.88)** 的**工业级源码重构快照与深度架构剖析智库**。
 
-## 仓库内容
+作为当今全球最为先进的自主 Agentic Coding 生产力工具之一，Claude Code 具备极高的系统工程复杂度。本项目旨在穿透打包混淆层，系统化梳理其底层 **「ReAct 执行主循环、MCP 协议网关、React/Ink 终端反应式渲染、AST 语法分析、子 Agent 协同与上下文主动剪枝」** 的架构机理，为学术研究、开源 Agent 框架演进与前沿代码助手研发提供权威的解剖学样本。
 
-- `src/`：提取出的主源码目录
-- `vendor/`：原生或第三方源码模块
-- `node_modules/`：提取时保留的依赖树快照
-- `.extract-meta.json`：提取元信息
-- `.extract-manifest.json`：提取清单
-- `ANALYSIS.md`：本项目的详细分析文档
+---
 
-## 分析结论摘要
+## 🏛️ 系统架构全景解剖 (System Architecture Blueprint)
 
-根据当前提取结果，这个项目可以概括为一个基于 **Node.js + TypeScript/TSX + React/Ink** 的终端式 AI 编程代理，核心能力主要包括：
-
-1. **AI 对话与查询引擎**
-   - 负责和 Claude 模型进行交互
-   - 包含主循环、上下文管理、会话历史、成本统计等核心逻辑
-
-2. **丰富的工具系统**
-   - 覆盖文件读写编辑、搜索、终端命令、网页抓取、网页搜索、MCP、任务管理、子 Agent 调用等
-   - 是 Claude Code 能够“像代理一样工作”的基础
-
-3. **终端 UI 系统**
-   - 基于 React + Ink 构建
-   - 包含消息渲染、输入组件、Diff 展示、设置、弹窗、状态栏、统计组件等
-
-4. **服务层与扩展能力**
-   - 包括 API 通信、OAuth、LSP、MCP、上下文压缩、语音输入、插件、技能、诊断追踪等
-
-5. **多 Agent / 远程协作能力**
-   - 包含 Coordinator、Remote/Teleport、IDE Bridge 等子系统
-   - 表明该项目不仅是单轮聊天 CLI，而是一个具备工作流和协作能力的完整开发助手
-
-## 目录结构概览
-
-```text
-CC-Source/
-├── .extract-manifest.json
-├── .extract-meta.json
-├── node_modules/
-├── src/
-├── vendor/
-├── ANALYSIS.md
-└── README.md
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        终端反应式呈现层 (Terminal UI Layer)            │
+│               React 18/19 + Ink + Marked-Terminal + Yoga Layout        │
+├────────────────────────────────────────────────────────────────────────┤
+│  - 沉浸式流式 Markdown 增量渲染       - 实时双向 Unified Diff 审查面板 │
+│  - 响应式多行命令输入与历史回溯 (Prompt)- 任务步进转轮与 Token 计费看板│
+└────────────────────────────────────┬───────────────────────────────────┘
+                                     │ User Actions & Stream Events
+┌────────────────────────────────────▼───────────────────────────────────┐
+│                        执行核心编排调度器 (Core Agent Loop)            │
+├────────────────────────────────────────────────────────────────────────┤
+│  [Query Engine]         主思考循环驱动 / 多轮对话自迭代 / 状态机递归   │
+│  [Context Compactor]    上下文自动修剪 / 智能记忆衰减 / 窗口超限平滑压缩│
+│  [Permission Guard]     高危 Shell/写操作敏感度评估与用户即时确认机制  │
+│  [Subagent Coordinator] 任务解耦派发 / 独立沙箱子 Agent 孵化与结果归并  │
+└────────────────────────────────────┬───────────────────────────────────┘
+                                     │ Tool Execution Bus / RPC
+┌────────────────────────────────────▼───────────────────────────────────┐
+│                        外设与系统能力总线 (Extensibility & Tools)      │
+├────────────────────────────────────────────────────────────────────────┤
+│  - File System Ops (Read/Write/Patch) - Shell Execution (Sandbox PTY)  │
+│  - AST Codebase Search (Ripgrep/Glob) - Web Browser / Fetch Services   │
+│  - Model Context Protocol (MCP Client)- LSP Language Server 协议桥接   │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 使用说明
+---
 
-这个仓库更适合作为：
+## 🔬 五大核心机制深度拆解 (Deep Insights)
 
-- 源码结构学习资料
-- CLI Agent 架构分析样本
-- 工具系统 / MCP / 终端 UI 的参考案例
-- 逆向整理与功能拆解的基础材料
+### 1. 终端 TUI 反应式渲染体系 (`src/components/`)
+* 彻底打破传统 CLI 单向 `console.log` 的桎梏，基于 **React/Ink** 将终端屏幕抽象为 DOM 树结构。
+* 实现了组件级别的局部状态重绘、Flexbox 盒模型终端自适应（基于 Facebook Yoga 引擎）以及细腻的代码 Diff 高亮对照。
 
-如果你想快速了解整体结构，建议先读：
+### 2. 强类型受控工具链与 MCP 网关 (`src/tools/`)
+* 系统中的每一个功能调用（读文件、正则搜索、Git 操作、终端命令）均遵循统一的生命周期标准；
+* 原生实现 **MCP (Model Context Protocol)** 客户端协议，不仅能调用内置工具，还能无缝挂载本地与网络 MCP Server 工具池。
 
-1. `README.md`
-2. `ANALYSIS.md`
-3. `src/entrypoints/`
-4. `src/tools/`
-5. `src/services/`
-6. `src/components/`
-7. `src/main.tsx`
+### 3. 自适应上下文感知与记忆压缩引擎 (`src/services/context/`)
+* 面对超长代码库浏览时，系统通过启发式压缩算法监控 Token 消耗水位；
+* 在接近模型上下文上限（Context Window Limit）时，自适应触发中间记忆折叠（Compaction），保留核心系统提示词与最终任务目标，防止灾难性遗忘。
 
-## 重要说明
+### 4. 协同子智能体机制 (Subagent Delegation)
+* 内置 Coordinator 协同体系，可根据任务复杂度将庞大工程任务切分为多个子任务，动态唤起隔离的 Subagent 并发执行，最终将产出物向上汇报聚合。
 
-- 这是**提取/还原后的源码快照**，不保证与上游官方开发仓库完全一致。
-- 某些文件布局、生成产物、依赖形式可能与官方仓库源码状态不同。
-- 复用、再分发或进一步公开传播时，请自行确认并遵守上游仓库、包分发与许可证要求。
+### 5. 开发者工具链整合 (IDE & LSP Integration)
+* 通过语言服务器协议（LSP）与 IDE Bridge，打通与本地编辑器（VSCode / Cursor 等）的跨进程联动，精准获取代码符号、定义跳转与诊断错误。
 
-## 详细分析
+---
 
-详见：[`ANALYSIS.md`](./ANALYSIS.md)
+## 📂 源码模块结构导览 (Directory Organization)
+
+```text
+CCL/
+├── src/                                   # 核心源码还原目录 (4,750+ 源码文件)
+│   ├── components/                        # React/Ink 终端 UI 组件库
+│   ├── entrypoints/                       # 各种模式启动入口 (CLI、IPC、Server)
+│   ├── services/                          # 核心底层业务驱动
+│   │   ├── api/                          # Claude API 客户端与网络层
+│   │   ├── context/                      # 会话上下文与 Token 压缩中枢
+│   │   ├── mcp/                          # Model Context Protocol 协议实现
+│   │   ├── lsp/                          # 语言服务器协议桥接器
+│   │   └── telemetry/                    # 性能指标与链路追踪
+│   ├── tools/                             # 全量原子工具实现 (File, Terminal, Web)
+│   └── main.tsx                           # TUI 主生命周期挂载入口
+├── vendor/                                # 第三方依赖或原生嵌入模块
+├── ANALYSIS.md                            # 详细模块分析白皮书
+├── .extract-manifest.json                 # 提取文件指纹清单
+└── README.md                              # 项目技术全景说明
+```
+
+---
+
+## 📖 核心研读推荐路线 (Study Guide)
+
+想要深入吸收其工程精华，建议按以下路线循序阅读：
+
+1. **宏观理解**：精读 [`ANALYSIS.md`](./ANALYSIS.md)，全面了解模块间耦合关系。
+2. **启动与入口**：查看 `src/entrypoints/` 与 `src/main.tsx`，理解 CLI 参数解析与环境初始化的全过程。
+3. **Agent 核心主循环**：深入 `src/services/` 下的查询引擎与状态机运转机理。
+4. **工具实现范式**：参考 `src/tools/`，学习大模型调用工具（Function Calling）的参数校验规范与安全确认拦截。
+5. **终端交互美学**：研读 `src/components/`，学习如何利用 React/Ink 构建现代终端交互界面。
+
+---
+
+## ⚠️ 免责声明与知识产权 (Disclaimer)
+
+* 本仓库代码为研究分析目的而归档的源码结构快照，旨在推动软件工程与 AI 代理架构的技术交流；
+* 相关商标、核心算法及版权归原作者 **Anthropic, PBC** 所有；
+* 任何商业使用或二次分发请务必遵守上游官方授权与相关许可协议。
